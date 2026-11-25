@@ -21,7 +21,7 @@ client.configure(mode="profile position", limits=(0.0, 305.0), profile_velocity=
 client.enable()
 client.run(0.01)
 client.move_to(5.0)
-status = client.run(2.0)   # status.position == 5.0, status.target_reached is True
+status = client.run(2.0)  # status.position == 5.0, status.target_reached is True
 ```
 
 ## Name
