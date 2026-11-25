@@ -98,3 +98,23 @@ def test_a_run_is_repeatable_to_the_count():
         ]
 
     assert run() == run()
+
+
+def test_a_reset_asked_for_during_the_fault_reaction_is_held_until_the_drive_can_take_it():
+    client, transport, drive = moving("cyclic synchronous position")
+    client.move_to(180.0)
+    client.run(0.05)  # racing at the drive's 30 mm/s limit
+    drive.fault(o.ERR_FOLLOWING)
+    client.fault_reset()
+    assert client.cycle().state == o.FAULT_REACTION_ACTIVE  # still ramping down: reset ignored
+    assert client.run(0.5).state == o.SWITCH_ON_DISABLED  # taken once the drive reached fault
+    assert client.status.error_code == o.ERR_NONE
+
+
+def test_a_reset_with_no_fault_does_nothing():
+    client, _, _ = moving()
+    client.enable()
+    client.fault_reset()
+    assert client.run(0.01).state == o.SWITCH_ON_DISABLED  # a reset also withdraws the enable
+    client.enable()
+    assert client.run(0.01).state == o.OPERATION_ENABLED

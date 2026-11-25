@@ -84,7 +84,9 @@ class Cia402Client:
         self.transport, self.scaling = transport, scaling
         self._want_enabled = False
         self._want_quick_stop = False
-        self._reset_cycles = 0  # cycles left of the fault reset pulse
+        self._want_reset = False
+        self._reset_low_sent = False  # the pulse on bit 7 starts low
+        self._reset_fresh = False  # no status has been read since the reset was asked for
         self._mode = o.NO_MODE
         self._target_counts: int | None = None
         self._pending_set_point = False  # profile position: a set-point to hand over
@@ -160,8 +162,11 @@ class Cia402Client:
         self._pending_set_point = False
 
     def fault_reset(self) -> None:
-        """Ask the drive to leave fault. It comes back disabled: enabling is a separate ask."""
-        self._reset_cycles = 2
+        """Ask the drive to leave fault. It comes back disabled: enabling is a separate ask.
+
+        A drive ignores a reset while its fault reaction is still under way, so the request
+        is held until the drive reports fault, and then sent as a pulse."""
+        self._want_reset, self._reset_low_sent, self._reset_fresh = True, False, True
         self._want_enabled = self._want_quick_stop = False
 
     def move_to(self, position: float) -> None:
@@ -185,10 +190,24 @@ class Cia402Client:
         """One process-data cycle: send what the state calls for, read the drive back."""
         state = self.status.state if self.status else None
         mode_bits = 0
-        if self._reset_cycles:
-            # a pulse on bit 7: low for one cycle, then high, so the drive sees a rising edge
-            self._reset_cycles -= 1
-            cw = o.CW_FAULT_RESET if self._reset_cycles == 0 else 0
+        if (
+            self._want_reset
+            and not self._reset_fresh
+            and state
+            not in (
+                o.FAULT,
+                o.FAULT_REACTION_ACTIVE,
+            )
+        ):
+            self._want_reset = False  # the drive, read since the request, is not in fault
+        self._reset_fresh = False
+        if self._want_reset:
+            # a pulse on bit 7: low for one cycle, then high, so the drive sees a rising edge;
+            # held low while the fault reaction runs, and repeated until the drive has left fault
+            if state == o.FAULT and self._reset_low_sent:
+                cw, self._reset_low_sent = o.CW_FAULT_RESET, False
+            else:
+                cw, self._reset_low_sent = 0, True
         elif self._want_quick_stop:
             cw = o.CMD_QUICK_STOP
         elif not self._want_enabled:

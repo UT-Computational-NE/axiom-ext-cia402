@@ -233,6 +233,8 @@ class EmulatedDrive:
 
     def _held_to_limits(self, position: float) -> float:
         low, high = self._limits()
+        if low > high:  # limits that contradict each other limit nothing
+            return position
         held = min(max(position, low), high)
         if held != position:
             self._internal_limit = True
@@ -255,17 +257,22 @@ class EmulatedDrive:
         if self.stalled:
             pass
         elif self.state in (o.OPERATION_ENABLED, o.QUICK_STOP_ACTIVE, o.FAULT_REACTION_ACTIVE):
-            alpha = 1.0 - math.exp(-dt / self.axis.servo_time_constant_s)
-            self._actual += alpha * (self._demand - self._actual)
+            tau = self.axis.servo_time_constant_s
+            alpha = 1.0 if tau <= 0 else 1.0 - math.exp(-dt / tau)
+            move = alpha * (self._demand - self._actual)
+            # The axis cannot outrun the drive's velocity limit, for example when catching up
+            # with its demand after a stall clears.
+            reach = self.od.read(o.MAX_PROFILE_VELOCITY) * dt
+            self._actual += min(max(move, -reach), reach)
         self._actual_v = (self._actual - before) / dt
 
     def _ramp_down(self, dt: float) -> None:
         speed = abs(self._demand_v)
-        drop = self._stop_decel * dt
+        # A deceleration of 0 is taken as "stop at once", so that a stop always ends.
+        drop = self._stop_decel * dt if self._stop_decel > 0 else speed
         if speed <= drop:
-            self._demand += (
-                self._demand_v * (speed / self._stop_decel if self._stop_decel else 0) / 2
-            )
+            if self._stop_decel > 0:
+                self._demand += self._demand_v * (speed / self._stop_decel) / 2
             self._demand_v = 0.0
             self._stop_decel = None
             if self.state == o.FAULT_REACTION_ACTIVE:
