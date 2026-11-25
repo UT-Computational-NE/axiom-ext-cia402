@@ -70,9 +70,8 @@ def test_random_controlwords_modes_and_targets_never_break_the_drive(seed):
     dt = rng.choice([0.0005, 0.001, 0.004])
     for _ in range(3000):
         if rng.random() < 0.3:
-            d.od.write(o.CONTROLWORD, 0, rng.choice(
-                [0x00, 0x02, 0x06, 0x07, 0x0F, 0x1F, 0x3F, 0x5F, 0x80, 0x8F, 0x10F, rng.getrandbits(16)]
-            ))  # fmt: skip
+            words = [0x00, 0x02, 0x06, 0x07, 0x0F, 0x1F, 0x3F, 0x5F, 0x80, 0x8F, 0x10F]
+            d.od.write(o.CONTROLWORD, 0, rng.choice([*words, rng.getrandbits(16)]))
         if rng.random() < 0.05:
             d.od.write(o.MODES_OF_OPERATION, 0, rng.choice([0, 1, 6, 8, 3, -1, 127]))
         if rng.random() < 0.2:
