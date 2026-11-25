@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import pytest
 
-from cia402_emulator import ClientRefused
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import ClientRefused
+from axiom_ext_cia402 import objects as o
 
 
 def enabled(parts):

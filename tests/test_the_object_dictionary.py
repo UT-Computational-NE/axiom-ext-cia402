@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import pytest
 
-from cia402_emulator import EmulatedDrive, SdoAbort
-from cia402_emulator import dictionary as d
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import EmulatedDrive, SdoAbort
+from axiom_ext_cia402 import dictionary as d
+from axiom_ext_cia402 import objects as o
 
 
 def abort(call) -> int:

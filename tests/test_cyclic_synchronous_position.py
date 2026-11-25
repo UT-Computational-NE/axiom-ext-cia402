@@ -8,7 +8,7 @@ import math
 
 import pytest
 
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import objects as o
 
 
 def enabled(parts):

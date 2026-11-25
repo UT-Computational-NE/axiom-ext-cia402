@@ -5,7 +5,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cia402-emulator"
+name = "axiom-ext-cia402"
 version = "0.1.0"
 description = "A CiA 402 servo drive emulator (object dictionary, power state machine, profile position, cyclic synchronous position) and the host-side client that drives it or a real drive. No dependencies."
 readme = "README.md"
@@ -17,7 +17,7 @@ dependencies = []
 dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cia402_emulator"]
+packages = ["src/axiom_ext_cia402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

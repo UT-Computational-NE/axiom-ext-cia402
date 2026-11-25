@@ -1,6 +1,6 @@
 # Copyright (c) 2026 The University of Texas at Austin
 # SPDX-License-Identifier: Apache-2.0
-"""``python -m cia402_emulator``: run an emulated drive through its paces and print what it did."""
+"""``python -m axiom_ext_cia402``: run an emulated drive through its paces and print what it did."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def main() -> int:
         profile_acceleration=50.0, profile_deceleration=50.0, quick_stop_deceleration=200.0,
         following_error_window=1.0, position_window=0.01,
     )  # fmt: skip
-    print(f"cia402-emulator {__version__}: an emulated drive at 150 mm, 1 ms bus cycle")
+    print(f"axiom-ext-cia402 {__version__}: an emulated drive at 150 mm, 1 ms bus cycle")
     client.enable()
     check("enable reaches operation enabled", client.run(0.01).state == o.OPERATION_ENABLED)
     client.move_to(155.0)

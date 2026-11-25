@@ -9,7 +9,7 @@ A transport does two things, as a fieldbus master does for a CoE drive:
   and the targets), the drive's inputs come back (the statusword and the actual values),
   and one bus cycle of time passes.
 
-:class:`EmulatedTransport` carries these to an :class:`~cia402_emulator.drive.EmulatedDrive`
+:class:`EmulatedTransport` carries these to an :class:`~axiom_ext_cia402.drive.EmulatedDrive`
 in the same process, on simulated time. A transport for a real bus implements the same three
 methods over an EtherCAT master; this package does not contain one.
 """

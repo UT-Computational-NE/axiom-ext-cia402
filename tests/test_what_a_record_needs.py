@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 from conftest import make
 
-from cia402_emulator import ClientRefused
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import ClientRefused
+from axiom_ext_cia402 import objects as o
 
 
 def test_the_client_says_which_drive_it_is_talking_to(pp):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cia402_emulator import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
+from axiom_ext_cia402 import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
 
 COUNTS_PER_MM = 1000.0
 CYCLE_S = 0.001

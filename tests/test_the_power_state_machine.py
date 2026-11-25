@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import pytest
 
-from cia402_emulator import EmulatedDrive
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import EmulatedDrive
+from axiom_ext_cia402 import objects as o
 
 
 def drive_at(*commands):

@@ -22,7 +22,7 @@ import random
 import pytest
 from conftest import make
 
-from cia402_emulator import (
+from axiom_ext_cia402 import (
     AxisModel,
     Cia402Client,
     ClientRefused,
@@ -31,7 +31,7 @@ from cia402_emulator import (
     Scaling,
     SdoAbort,
 )
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import objects as o
 
 POWERED = (o.OPERATION_ENABLED, o.QUICK_STOP_ACTIVE, o.FAULT_REACTION_ACTIVE)
 LOW, HIGH, V_MAX = 0, 305_000, 30_000

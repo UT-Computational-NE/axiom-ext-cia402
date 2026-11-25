@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """A CiA 402 servo drive emulator, and the host-side client that drives it or a real drive.
 
-from cia402_emulator import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
+from axiom_ext_cia402 import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
 
 client = Cia402Client(EmulatedTransport(EmulatedDrive(), cycle_s=0.001), Scaling(1000.0))
 client.configure(mode="profile position", limits=(0.0, 305.0), profile_velocity=10.0)

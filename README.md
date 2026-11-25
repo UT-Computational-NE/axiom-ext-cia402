@@ -14,7 +14,7 @@ simulated time. With a transport over a real EtherCAT master it reaches a real d
 client, its settings and the tests of its behaviour stay the same.
 
 ```python
-from cia402_emulator import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
+from axiom_ext_cia402 import Cia402Client, EmulatedDrive, EmulatedTransport, Scaling
 
 client = Cia402Client(EmulatedTransport(EmulatedDrive(), cycle_s=0.001), Scaling(1000.0, "mm"))
 client.configure(mode="profile position", limits=(0.0, 305.0), profile_velocity=10.0)
@@ -28,7 +28,8 @@ status = client.run(2.0)   # status.position == 5.0, status.target_reached is Tr
 
 The repository is `axiom-ext-cia402`, by Axiom's rule for a standalone extension specific to
 one capability (`axiom-ext-<code-or-capability>`, kept in the consuming organization). The
-Python package it holds is `cia402_emulator`. It has no dependency on Axiom, so that a machine
+Python package has the same name, `axiom_ext_cia402`, as the organization's other extensions
+do. It has no dependency on Axiom, so that a machine
 whose software must have no dependencies can install it. An AEOS manifest
 (`axiom-extension.toml`) is not written yet.
 

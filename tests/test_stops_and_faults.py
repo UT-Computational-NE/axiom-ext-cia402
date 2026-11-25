@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 from conftest import make
 
-from cia402_emulator import objects as o
+from axiom_ext_cia402 import objects as o
 
 
 def moving(mode="profile position", **overrides):
