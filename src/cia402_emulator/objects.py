@@ -14,6 +14,7 @@ from dataclasses import dataclass
 # ---- object indices -------------------------------------------------------------------------
 
 DEVICE_TYPE = 0x1000
+IDENTITY = 0x1018  # sub 1 vendor id, 2 product code, 3 revision number, 4 serial number
 ERROR_CODE = 0x603F
 CONTROLWORD = 0x6040
 STATUSWORD = 0x6041

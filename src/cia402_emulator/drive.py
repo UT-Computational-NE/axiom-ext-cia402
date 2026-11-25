@@ -51,6 +51,11 @@ class EmulatedDrive:
         self.od = od = ObjectDictionary()
         ro = {"writable": False}
         od.add(o.DEVICE_TYPE, "device type", o.U32, 0x00020192, **ro)
+        # Identity: zeros for the vendor and product, because this is no manufacturer's drive.
+        od.add(o.IDENTITY, "vendor id", o.U32, 0, subindex=1, **ro)
+        od.add(o.IDENTITY, "product code", o.U32, 0, subindex=2, **ro)
+        od.add(o.IDENTITY, "revision number", o.U32, 0x00010000, subindex=3, **ro)
+        od.add(o.IDENTITY, "serial number", o.U32, 0, subindex=4, **ro)
         od.add(o.ERROR_CODE, "error code", o.U16, 0, **ro)
         od.add(o.CONTROLWORD, "controlword", o.U16, 0)
         od.add(o.STATUSWORD, "statusword", o.U16, 0, **ro)

@@ -65,6 +65,19 @@ Other homing methods end in homing error.
 | Typed values | A value outside the object's type is refused with 0x06090030 | `test_a_value_outside_the_objects_type_is_refused` |
 | Supported modes | Object 0x6502 states profile position, homing and cyclic synchronous position | `test_the_drive_states_which_modes_it_supports` |
 
+## What a record of a run needs
+
+| Feature | What happens | Shown by |
+|---|---|---|
+| Which drive | The client reads the device type and the identity object (vendor, product, revision, serial) | `test_the_client_says_which_drive_it_is_talking_to` |
+| What it was told | Every setting written is kept with the value the drive read back, and a setting the drive did not take is refused | `test_every_setting_written_is_kept_with_what_the_drive_read_back`, `test_a_setting_the_drive_does_not_take_is_refused` |
+| Everything that changed, at bus rate | State, mode, error code, internal limit, following error and target reached changes are kept as events with their bus time, so one that came and went between two reads is not lost | `test_events_carry_every_state_the_drive_passed_through_with_its_bus_time`, `test_a_fault_that_came_and_went_between_two_reads_is_still_in_the_events` |
+| What the host asked for | Enable, disable, quick stop, fault reset and each new target are events. A streamed target that repeats is one event | `test_a_streamed_target_is_one_event_until_it_changes` |
+| Bus health | Cycles, lost cycles, the longest loss, and whether it is losing now | `test_bus_health_counts_lost_cycles_and_the_longest_loss` |
+| The controlword sent | Each status carries the controlword of the cycle it came back from | `test_the_status_carries_the_controlword_that_was_sent` |
+
+The event buffer holds the latest 4,096 events (`test_the_event_buffer_is_bounded`).
+
 ## What holds under random and extreme use
 
 These are in `tests/test_chaos.py`. Every case is seeded.

@@ -15,6 +15,7 @@ appear only in :class:`Scaling`.
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 
 from . import objects as o
@@ -61,6 +62,7 @@ class DriveStatus:
     error_code: int
     error: str
     statusword: int
+    controlword: int  # what the host sent in the cycle this status came back from
     unit: str
 
     @property
@@ -94,6 +96,15 @@ class Cia402Client:
         self._start_homing = False
         self._homed = False
         self.status: DriveStatus | None = None
+        #: Every object written while configuring, with what the drive read back.
+        self.configuration: list[dict] = []
+        #: Bus health since this client started.
+        self.cycles = 0
+        self.lost_cycles = 0
+        self.longest_loss_cycles = 0
+        self._loss_run = 0
+        self._events: deque[dict] = deque(maxlen=4096)
+        self._seen: dict = {}
 
     # ---- configuration (SDO) -----------------------------------------------------------------
 
@@ -123,7 +134,22 @@ class Cia402Client:
         if not supported >> bit & 1:
             raise ClientRefused(f"the drive does not support {mode} (0x6502 = {supported:#x})")
         self._mode = o.MODE_CODES[mode]
-        write, s = self.transport.sdo_write, self.scaling
+        s = self.scaling
+        self.configuration = []
+
+        def write(index: int, subindex: int, value: int) -> None:
+            """Write, read back, and keep both: a setting the drive did not take is refused."""
+            self.transport.sdo_write(index, subindex, value)
+            back = self.transport.sdo_read(index, subindex)
+            self.configuration.append(
+                {"index": index, "subindex": subindex, "written": value, "read_back": back}
+            )
+            if back != value:
+                raise ClientRefused(
+                    f"object {index:#06x}:{subindex} was written {value} and reads back {back}"
+                )
+
+        self._event("configure", mode=mode)
         if limits is not None:
             low, high = sorted(s.to_counts(x) for x in limits)
             write(o.SOFTWARE_POSITION_LIMIT, 1, low)
@@ -152,14 +178,17 @@ class Cia402Client:
         if self._mode == o.NO_MODE:
             raise ClientRefused("no mode of operation is configured")
         self._want_enabled, self._want_quick_stop = True, False
+        self._event("asked", what="enable")
 
     def disable(self) -> None:
         self._want_enabled, self._want_quick_stop = False, False
         self._pending_set_point = False
+        self._event("asked", what="disable")
 
     def quick_stop(self) -> None:
         self._want_quick_stop = True
         self._pending_set_point = False
+        self._event("asked", what="quick stop")
 
     def fault_reset(self) -> None:
         """Ask the drive to leave fault. It comes back disabled: enabling is a separate ask.
@@ -168,13 +197,17 @@ class Cia402Client:
         is held until the drive reports fault, and then sent as a pulse."""
         self._want_reset, self._reset_low_sent, self._reset_fresh = True, False, True
         self._want_enabled = self._want_quick_stop = False
+        self._event("asked", what="fault reset")
 
     def move_to(self, position: float) -> None:
         """A new target, in the host's unit. Profile position hands it over as a set-point;
         cyclic synchronous position sends it every cycle from now on."""
         if self._mode not in (o.PROFILE_POSITION, o.CYCLIC_SYNCHRONOUS_POSITION):
             raise ClientRefused("move_to needs profile position or cyclic synchronous position")
-        self._target_counts = self.scaling.to_counts(position)
+        counts = self.scaling.to_counts(position)
+        if counts != self._target_counts:  # a stream that repeats a target is one event
+            self._event("asked", what="target", position=position)
+        self._target_counts = counts
         self._pending_set_point = self._mode == o.PROFILE_POSITION
 
     def home_here(self) -> None:
@@ -234,8 +267,21 @@ class Cia402Client:
         }
         if target is not None:
             outputs[(o.TARGET_POSITION, 0)] = target
-        inputs = self.transport.exchange(outputs)
-        self.status = self._read(inputs)
+        self.cycles += 1
+        try:
+            inputs = self.transport.exchange(outputs)
+        except ConnectionError:
+            self.lost_cycles += 1
+            self._loss_run += 1
+            self.longest_loss_cycles = max(self.longest_loss_cycles, self._loss_run)
+            if self._loss_run == 1:
+                self._event("bus", what="no answer from the drive")
+            raise
+        if self._loss_run:
+            self._event("bus", what="the drive answers again", after_cycles=self._loss_run)
+            self._loss_run = 0
+        self.status = self._read(inputs, outputs[(o.CONTROLWORD, 0)])
+        self._note_changes(self.status)
         if self.status.state != o.OPERATION_ENABLED:
             # A drive that has left operation has dropped its targets. Do not resend them.
             self._target_counts = None
@@ -266,7 +312,68 @@ class Cia402Client:
             return o.CW_NEW_SET_POINT
         return 0
 
-    def _read(self, inputs: dict) -> DriveStatus:
+    # ---- what a record of the run needs ---------------------------------------------------------
+
+    def identity(self) -> dict:
+        """Which drive this is, from object 0x1018 and the device type."""
+        read = self.transport.sdo_read
+        return {
+            "device_type": read(o.DEVICE_TYPE),
+            "vendor_id": read(o.IDENTITY, 1),
+            "product_code": read(o.IDENTITY, 2),
+            "revision_number": read(o.IDENTITY, 3),
+            "serial_number": read(o.IDENTITY, 4),
+        }
+
+    def health(self) -> dict:
+        """How the bus has behaved since this client started."""
+        return {
+            "bus_cycle_s": self.transport.cycle_s,
+            "cycles": self.cycles,
+            "lost_cycles": self.lost_cycles,
+            "longest_loss_cycles": self.longest_loss_cycles,
+            "losing_now": self._loss_run > 0,
+        }
+
+    def take_events(self) -> list[dict]:
+        """Everything that changed since the last call, in order, each with its bus time.
+
+        The client sees every bus cycle, so a state that came and went between two reads of
+        ``status`` is still here.
+        """
+        events = list(self._events)
+        self._events.clear()
+        return events
+
+    def _event(self, kind: str, **fields) -> None:
+        self._events.append(
+            {"bus_time_s": round(self.cycles * self.transport.cycle_s, 6), "event": kind, **fields}
+        )
+
+    def _note_changes(self, status: DriveStatus) -> None:
+        now = {
+            "state": status.state,
+            "mode": status.mode,
+            "error_code": status.error_code,
+            "internal_limit": status.internal_limit,
+            "following_error_flag": status.following_error_flag,
+            "target_reached": status.target_reached,
+        }
+        for name, value in now.items():
+            if self._seen.get(name, value) != value or (name == "state" and not self._seen):
+                extra = {"error": status.error} if name == "error_code" else {}
+                self._event(
+                    "changed",
+                    what=name,
+                    was=self._seen.get(name),
+                    now=value,
+                    position=status.position,
+                    statusword=status.statusword,
+                    **extra,
+                )
+        self._seen = now
+
+    def _read(self, inputs: dict, controlword: int = 0) -> DriveStatus:
         s = self.scaling
         sw = inputs[(o.STATUSWORD, 0)]
         mode = inputs[(o.MODES_OF_OPERATION_DISPLAY, 0)]
@@ -287,5 +394,6 @@ class Cia402Client:
             error_code=code,
             error=o.ERROR_NAMES.get(code, f"error {code:#06x}"),
             statusword=sw,
+            controlword=controlword,
             unit=s.unit,
         )
