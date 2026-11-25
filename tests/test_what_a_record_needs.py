@@ -1,4 +1,5 @@
 # Copyright (c) 2026 The University of Texas at Austin
+# Copyright (c) 2026 B-Tree Labs
 # SPDX-License-Identifier: Apache-2.0
 """What a record of a run needs from the client: which drive, what it was told, what happened
 between reads, and how the bus behaved."""

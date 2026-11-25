@@ -1,4 +1,5 @@
 # Copyright (c) 2026 The University of Texas at Austin
+# Copyright (c) 2026 B-Tree Labs
 # SPDX-License-Identifier: Apache-2.0
 """An emulated CiA 402 servo drive: an object dictionary, the power state machine and motion.
 

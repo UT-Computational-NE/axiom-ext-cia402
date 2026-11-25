@@ -1,4 +1,5 @@
 # Copyright (c) 2026 The University of Texas at Austin
+# Copyright (c) 2026 B-Tree Labs
 # SPDX-License-Identifier: Apache-2.0
 """A CiA 402 servo drive emulator, and the host-side client that drives it or a real drive.
 

@@ -1,4 +1,5 @@
 # Copyright (c) 2026 The University of Texas at Austin
+# Copyright (c) 2026 B-Tree Labs
 # SPDX-License-Identifier: Apache-2.0
 [build-system]
 requires = ["hatchling"]
@@ -11,7 +12,7 @@ description = "A CiA 402 servo drive emulator (object dictionary, power state ma
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
-authors = [{ name = "UT Computational NE" }]
+authors = [{ name = "The University of Texas at Austin" }, { name = "B-Tree Labs" }]
 keywords = ["CiA 402", "CANopen", "EtherCAT", "servo drive", "emulator"]
 dependencies = []
 

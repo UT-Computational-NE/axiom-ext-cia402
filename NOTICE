@@ -1,0 +1,62 @@
+axiom-ext-cia402: a CiA 402 servo drive emulator and host-side client
+=====================================================================
+
+Copyright (c) 2026 The University of Texas at Austin
+Copyright (c) 2026 B-Tree Labs
+
+Licensed under the Apache License, Version 2.0 (the "License"); you
+may not use this work except in compliance with the License. You may
+obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+*B-Tree Labs is the operating name of B-Tree Ventures, LLC.*
+
+
+Joint copyright
+---------------
+
+This package is jointly copyrighted by:
+
+  * The University of Texas at Austin
+  * B-Tree Labs
+
+It is released as a single jointly-copyrighted work under Apache-2.0.
+
+
+External dependencies
+---------------------
+
+None. The package uses only the Python standard library.
+
+CiA 402 is the CANopen device profile for drives and motion control
+(IEC 61800-7-201). This package implements parts of that profile from
+its published behaviour. It contains no text of the standard, and it is
+not affiliated with, certified by or endorsed by CAN in Automation, the
+EtherCAT Technology Group, or any drive manufacturer.
+
+
+Trademarks
+----------
+
+"Axiom", "AEOS", and the B-Tree Labs origin-glyph mark are
+trademarks of B-Tree Labs (B-Tree Ventures, LLC). The Apache-2.0
+license does not grant rights to use these marks; see Apache-2.0 §6.
+
+Use of "The University of Texas at Austin" and associated UT marks
+is governed by UT brand policy and is not granted by this license.
+
+"CANopen" and "CiA" are trademarks of CAN in Automation e.V.
+"EtherCAT" is a trademark of Beckhoff Automation GmbH.
+
+
+Contributing
+------------
+
+Contributors agree to license their contributions under Apache-2.0.

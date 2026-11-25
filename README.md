@@ -86,4 +86,5 @@ A run is deterministic: the same calls give the same positions to the count.
 
 ## Licence
 
-Apache-2.0. See `LICENSE`.
+Apache-2.0. See `LICENSE` and `NOTICE`. Jointly copyrighted by The University of Texas at
+Austin and B-Tree Labs.
