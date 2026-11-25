@@ -1,4 +1,4 @@
-# cia402-emulator
+# axiom-ext-cia402
 
 An emulated CiA 402 servo drive, and the host-side client that drives it or a real drive.
 No dependencies.
@@ -23,6 +23,14 @@ client.run(0.01)
 client.move_to(5.0)
 status = client.run(2.0)   # status.position == 5.0, status.target_reached is True
 ```
+
+## Name
+
+The repository is `axiom-ext-cia402`, by Axiom's rule for a standalone extension specific to
+one capability (`axiom-ext-<code-or-capability>`, kept in the consuming organization). The
+Python package it holds is `cia402_emulator`. It has no dependency on Axiom, so that a machine
+whose software must have no dependencies can install it. An AEOS manifest
+(`axiom-extension.toml`) is not written yet.
 
 ## What the emulated drive does
 
