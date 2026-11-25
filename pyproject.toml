@@ -11,7 +11,12 @@ description = "A CiA 402 servo drive emulator (object dictionary, power state ma
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
+authors = [{ name = "UT Computational NE" }]
+keywords = ["CiA 402", "CANopen", "EtherCAT", "servo drive", "emulator"]
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/UT-Computational-NE/axiom-ext-cia402"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]

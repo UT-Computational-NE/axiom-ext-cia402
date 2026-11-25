@@ -58,6 +58,23 @@ the object dictionary. Where a manufacturer's drive differs from the profile, or
 this emulator does not know. Compare it against the drive's own object list before relying
 on it for that drive.
 
+## Status
+
+Version 0.1.0, not released to any package index. The emulator is built from the CiA 402
+profile in general. It has not been compared against any manufacturer's drive or object list,
+and it has not been run against hardware. Treat every default as a placeholder.
+
+## Install
+
+From a checkout:
+
+```
+pip install .
+python -m axiom_ext_cia402     # exercises an emulated drive and prints PASS or what failed
+```
+
+It needs Python 3.11 or newer and nothing else.
+
 ## Tests
 
 ```
@@ -66,3 +83,7 @@ pytest
 ```
 
 A run is deterministic: the same calls give the same positions to the count.
+
+## Licence
+
+Apache-2.0. See `LICENSE`.
